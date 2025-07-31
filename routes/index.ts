@@ -6,10 +6,6 @@ export function setupRoutes(
 ): Router {
   const router = Router();
 
-  router.get("/", (req, res) => {
-    res.send("Hello World");
-  });
-
   // Log Activity routes
   router.get(
     "/summary/:user_id&:start_time&:end_time",

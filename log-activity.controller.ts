@@ -11,20 +11,24 @@ export class LogActivityController {
     try {
       const body = req.params as unknown as GetUserLogsDto;
 
+      const startTime = new Date(body.start_time);
+      const endTime = new Date(body.end_time);
+
       if (!body.user_id) {
         res.status(400).json({ error: "User ID is required" });
         return;
       }
 
-      if (!body.start_time || !body.end_time) {
+      if (!startTime || !endTime) {
         res.status(400).json({ error: "Start and end time are required" });
         return;
       }
 
-      if (body.start_time >= body.end_time) {
+      if (startTime >= endTime) {
         res.status(400).json({ error: "Start time must be before end time" });
         return;
       }
+
       const logs = await this.logActivityService.getUserLogs(body);
       res.json(logs);
     } catch (error) {

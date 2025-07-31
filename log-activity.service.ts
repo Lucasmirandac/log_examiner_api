@@ -23,6 +23,7 @@ export class LogActivityService {
 
       const parsedData: LogActivity[] = this.utilsService.csvJSON(data);
       this.logActivities = parsedData;
+
       this.processData(parsedData);
     } catch (error) {
       console.error(error.message);
@@ -54,6 +55,8 @@ export class LogActivityService {
           log.timestamp >= body.start_time && log.timestamp <= body.end_time
       );
 
+      console.log(filteredLogs);
+
       const actions = filteredLogs.length;
 
       const mostFrequentAction = this.getMostFrequentAction(filteredLogs);
@@ -66,7 +69,7 @@ export class LogActivityService {
         totalActions: actions,
         mostFrequentyAction: mostFrequentAction,
         averageDuration: averageDuration,
-        mostFrequentPage: "",
+        mostFrequentPage: mostFrequentPage,
       };
       return response;
     } catch (error) {
@@ -107,8 +110,9 @@ export class LogActivityService {
         new Date(log.metadata.timestamp).getTime();
       return acc + duration;
     }, 0);
-
-    return totalDuration / logs.length;
+    const averageDuration = totalDuration / logs.length;
+    console.log(averageDuration);
+    return averageDuration;
   }
 
   private getMostFrequentAction(
