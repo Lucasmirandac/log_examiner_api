@@ -1,5 +1,7 @@
 import { GetUserLogsDto } from "./dtos/getUserData/ get-user-logs.dto";
 import { UserLogsResponse } from "./dtos/getUserData/user-logs-response.dto";
+import { GetActionTrendsDto } from "./dtos/getUserTrends/get-user-trends.dto";
+import { ActionTrendsResponse } from "./dtos/getUserTrends/user-trends-response.dto";
 import { LogActivity } from "./log-activity.interface";
 import { UtilsService } from "./utilsService";
 
@@ -42,6 +44,8 @@ export class LogActivityService {
 
   async getUserLogs(body: GetUserLogsDto): Promise<UserLogsResponse> {
     try {
+      await this.getLogActivities();
+
       const userLogs = this.userData.get(body.user_id);
       if (!userLogs) throw new Error("User not found");
 
@@ -54,10 +58,14 @@ export class LogActivityService {
 
       const mostFrequentAction = this.getMostFrequentAction(filteredLogs);
 
+      const averageDuration = this.getAverageDuration(filteredLogs);
+
+      const mostFrequentPage = this.getMostFrequentPage(filteredLogs);
+
       const response: UserLogsResponse = {
         totalActions: actions,
         mostFrequentyAction: mostFrequentAction,
-        averageDuration: 0,
+        averageDuration: averageDuration,
         mostFrequentPage: "",
       };
       return response;
@@ -65,6 +73,42 @@ export class LogActivityService {
       console.error(error.message);
       throw error;
     }
+  }
+
+  private getMostFrequentPage(
+    logs: { action: string; timestamp: string; metadata: any }[]
+  ): string {
+    const pageCount = new Map<string, number>();
+
+    for (const log of logs) {
+      const page = log.metadata.page;
+      pageCount.set(page, (pageCount.get(page) || 0) + 1);
+    }
+
+    let mostFrequentPage = "";
+    let maxCount = 0;
+
+    for (const [page, count] of pageCount.entries()) {
+      if (count > maxCount) {
+        maxCount = count;
+        mostFrequentPage = page;
+      }
+    }
+
+    return mostFrequentPage;
+  }
+
+  private getAverageDuration(
+    logs: { action: string; timestamp: string; metadata: any }[]
+  ): number {
+    const totalDuration = logs.reduce((acc, log) => {
+      const duration =
+        new Date(log.timestamp).getTime() -
+        new Date(log.metadata.timestamp).getTime();
+      return acc + duration;
+    }, 0);
+
+    return totalDuration / logs.length;
   }
 
   private getMostFrequentAction(

@@ -46,9 +46,9 @@ export class LogActivityController {
       }
 
       if (body.start_time >= body.end_time) {
-
-      const logs = await this.logActivityService.getActionTrends(body);
-      res.json(logs);
+        //const logs = await this.logActivityService.getActionTrends(body);
+        //res.json(logs);
+      }
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
