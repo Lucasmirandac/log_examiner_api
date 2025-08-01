@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { LogActivityController } from "../log-activity.controller";
+import { LogActivityController } from "../controllers/log-activity.controller";
 
 export function setupRoutes(
   logActivityController: LogActivityController
@@ -8,12 +8,12 @@ export function setupRoutes(
 
   // Log Activity routes
   router.get(
-    "/summary/:user_id&:start_time&:end_time",
+    "/summary",
     logActivityController.getUserLogs.bind(logActivityController)
   );
 
   router.get(
-    "/action-trends/:start_time/:end_time",
+    "/action-trends",
     logActivityController.getActionTrends.bind(logActivityController)
   );
 

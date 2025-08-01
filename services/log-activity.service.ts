@@ -1,9 +1,9 @@
-import { GetUserLogsDto } from "./dtos/getUserData/ get-user-logs.dto";
-import { UserLogsResponse } from "./dtos/getUserData/user-logs-response.dto";
-import { GetActionTrendsDto } from "./dtos/getUserTrends/get-user-trends.dto";
-import { ActionTrendsResponse } from "./dtos/getUserTrends/user-trends-response.dto";
-import { LogActivity } from "./log-activity.interface";
-import { UtilsService } from "./utilsService";
+import { GetUserLogsDto } from "../dtos/getUserData/ get-user-logs.dto";
+import { UserLogsResponse } from "../dtos/getUserData/user-logs-response.dto";
+import { GetActionTrendsDto } from "../dtos/getUserTrends/get-user-trends.dto";
+import { ActionTrendsResponse } from "../dtos/getUserTrends/user-trends-response.dto";
+import { LogActivity } from "../interfaces/log-activity.interface";
+import { UtilsService } from "../utilsService";
 
 export class LogActivityService {
   private logActivities: LogActivity[] = [];
@@ -45,22 +45,27 @@ export class LogActivityService {
 
   async getUserLogs(body: GetUserLogsDto): Promise<UserLogsResponse> {
     try {
-      await this.getLogActivities();
+      if (!this.logActivities.length) await this.getLogActivities();
 
       const userLogs = this.userData.get(body.user_id);
-      if (!userLogs) throw new Error("User not found");
+      if (!userLogs) {
+        console.error(`User ${body.user_id} not found`);
+        throw new Error("User not found");
+      }
 
-      const filteredLogs = userLogs.filter(
-        (log) =>
-          log.timestamp >= body.start_time && log.timestamp <= body.end_time
-      );
+      let filteredLogs = userLogs;
 
-      console.log(filteredLogs);
+      // Apply date filtering only if both start_time and end_time are provided
+      if (body.start_time && body.end_time) {
+        filteredLogs = userLogs.filter(
+          (log) =>
+            log.timestamp >= body.start_time && log.timestamp <= body.end_time
+        );
+      }
 
       const actions = filteredLogs.length;
 
       const mostFrequentAction = this.getMostFrequentAction(filteredLogs);
-
       const averageDuration = this.getAverageDuration(filteredLogs);
 
       const mostFrequentPage = this.getMostFrequentPage(filteredLogs);
@@ -79,39 +84,34 @@ export class LogActivityService {
   }
 
   private getMostFrequentPage(
-    logs: { action: string; timestamp: string; metadata: any }[]
+    logs: {
+      action: string;
+      timestamp: string;
+      metadata: { duration: number; page: string };
+    }[]
   ): string {
     const pageCount = new Map<string, number>();
-
     for (const log of logs) {
-      const page = log.metadata.page;
-      pageCount.set(page, (pageCount.get(page) || 0) + 1);
+      pageCount.set(
+        log.metadata.page,
+        (pageCount.get(log.metadata.page) || 0) + 1
+      );
     }
-
-    let mostFrequentPage = "";
-    let maxCount = 0;
-
-    for (const [page, count] of pageCount.entries()) {
-      if (count > maxCount) {
-        maxCount = count;
-        mostFrequentPage = page;
-      }
-    }
-
-    return mostFrequentPage;
+    return pageCount.entries().next().value[0];
   }
 
   private getAverageDuration(
-    logs: { action: string; timestamp: string; metadata: any }[]
+    logs: {
+      action: string;
+      timestamp: string;
+      metadata: string;
+    }[]
   ): number {
     const totalDuration = logs.reduce((acc, log) => {
-      const duration =
-        new Date(log.timestamp).getTime() -
-        new Date(log.metadata.timestamp).getTime();
-      return acc + duration;
+      return acc + log.metadata.duration;
     }, 0);
+    console.debug(`totalDuration: ${totalDuration}`);
     const averageDuration = totalDuration / logs.length;
-    console.log(averageDuration);
     return averageDuration;
   }
 

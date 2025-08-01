@@ -1,7 +1,7 @@
 import express from "express";
 import { setupRoutes } from "./routes/index";
-import { LogActivityController } from "./log-activity.controller";
-import { LogActivityService } from "./log-activity.service";
+import { LogActivityController } from "./controllers/log-activity.controller";
+import { LogActivityService } from "./services/log-activity.service";
 import { UtilsService } from "./utilsService";
 
 const app = express();
