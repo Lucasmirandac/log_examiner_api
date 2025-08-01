@@ -3,7 +3,7 @@ import { UserLogsResponse } from "../dtos/getUserData/user-logs-response.dto";
 import { GetActionTrendsDto } from "../dtos/getUserTrends/get-user-trends.dto";
 import { ActionTrendsResponse } from "../dtos/getUserTrends/user-trends-response.dto";
 import { LogActivity } from "../interfaces/log-activity.interface";
-import { UtilsService } from "../utilsService";
+import { UtilsService } from "../utils/utilsService";
 
 export class LogActivityService {
   private logActivities: LogActivity[] = [];
@@ -104,7 +104,7 @@ export class LogActivityService {
     logs: {
       action: string;
       timestamp: string;
-      metadata: string;
+      metadata: { duration: number };
     }[]
   ): number {
     const totalDuration = logs.reduce((acc, log) => {
