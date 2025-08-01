@@ -2,7 +2,7 @@ import express from "express";
 import { setupRoutes } from "./routes/index";
 import { LogActivityController } from "./controllers/log-activity.controller";
 import { LogActivityService } from "./services/log-activity.service";
-import { UtilsService } from "./utilsService";
+import { UtilsService } from "./utils/utilsService";
 
 const app = express();
 app.use(express.json());
