@@ -2,9 +2,9 @@
 
 ## Instructions for running the application:
 
-### requirements: node >= 22 || docker
+### requirements: node >= 22 || docker cli
 
-running aplication locally: npm run start
+running aplication locally: npm i && npm run start
 running aplication with docker: docker build -t logs:0.0.1 && docker run -p 3001:3000 logs:0.0.1
 
 Explanation:
